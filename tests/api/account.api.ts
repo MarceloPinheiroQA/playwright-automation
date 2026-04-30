@@ -66,8 +66,12 @@ export async function deleteUser(request: APIRequestContext, email: string, pass
 
     expect(response.ok()).toBeTruthy()
     const body = (await response.json()) as AccountApiResponse
-    expect(body.responseCode).toBe(200)
-    expect(body.message).toContain('Account deleted')
+    // Idempotent cleanup for test setup:
+    // 200 -> account deleted, 404 -> account was already absent.
+    expect([200, 404]).toContain(body.responseCode)
+    if (body.responseCode === 200) {
+        expect(body.message).toContain('Account deleted')
+    }
 
     return body
 }
