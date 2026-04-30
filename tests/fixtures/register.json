@@ -1,0 +1,27 @@
+{
+    "REGISTER": {
+        "login_url": "/login",
+        "name": "Automation Project",
+        "firstname": "Automation",
+        "lastname": "Portfolio",
+        "email": "marcelo-playwright@automation.com",
+        "password": "Password123!",
+        "title": "Mr",
+        "birth_date": "21",
+        "birth_month": "December",
+        "birth_year": "2001",
+        "company": "Marcelo Portfolio",
+        "address1": "290 Bremmer Blvd",
+        "address2": "Apt 10",
+        "country": "Canada",
+        "state": "Ontario",
+        "city": "Toronto",
+        "zipcode": "M5V 3L9",
+        "mobile_number": "1 (647) 555-0199"
+    },
+    "LOGIN": {
+        "email": "marcelo-playwright@automation.com",
+        "password": "Password123!"
+    }
+
+}
