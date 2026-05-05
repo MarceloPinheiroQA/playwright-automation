@@ -8,17 +8,15 @@ let loginPage: LoginPage
 let user: CreateUserParams
 
 test.beforeEach(async ({ page }) => {
-    // 1. Gera um usuário novo e único para evitar colisões no paralelismo
     user = createUserFactory()
     loginPage = new LoginPage(page)
 })
 
 test.afterEach(async ({ request }) => {
-    // 2. Cleanup: Deleta o usuário criado logo após o fim do teste
     await deleteUser(request, user.email, user.password)
 })
 
-test.describe('Signup and Login Flow', () => {
+test.describe('Signup and Login Flow', { tag: '@login' }, () => {
 
     test('Verify login page access and signup a new user', async ({ page }) => {
         await loginPage.go('/login')
@@ -35,7 +33,6 @@ test.describe('Signup and Login Flow', () => {
     })
 
     test('Verify login through UI', async ({ page, request }) => {
-        // Setup: Cria o usuário via API para testar apenas o login na UI
         await createUser(request, user)
             
         await loginPage.go('/login')

@@ -4,6 +4,18 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Selecione o grupo de testes para rodar'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - '@api'
+          - '@login'
+
 jobs:
   test:
     timeout-minutes: 60
@@ -13,12 +25,23 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+    
     - name: Install dependencies
-      run: npm install -g yarn && yarn
+      run: yarn install --frozen-lockfile
+
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
+
     - name: Run Playwright tests
-      run: yarn playwright test
+      run: |
+        if [ "${{ github.event.inputs.test_type }}" == "all" ] || [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+          echo "Rodando todos os testes..."
+          yarn playwright test
+        else
+          echo "Rodando testes com a tag: ${{ github.event.inputs.test_type }}"
+          yarn playwright test --grep ${{ github.event.inputs.test_type }}
+        fi
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

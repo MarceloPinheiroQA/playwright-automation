@@ -2,8 +2,7 @@ import { APIRequestContext, expect, test } from '@playwright/test'
 import { VerifyAllBrandsAvailable, VerifyBrandsList, CompareSpecificBrand } from '../../api/general.api'
 import all_brands from '../../fixtures/api/all_brands.json'
 
-
-test.describe('API', () => {
+test.describe('API testing for brands', { tag: '@api' }, () => {
     test('Verify API is available', async ({ request }) => {
         await VerifyBrandsList(request)
     })
