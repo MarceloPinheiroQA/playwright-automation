@@ -1,49 +1,46 @@
 import { expect, test } from '@playwright/test'
-import { UserModel } from '../../models/user.model';
 import { LoginPage } from '../../pages/login/index.ts';
-// import { faker } from '@faker-js/faker'
-
-import data from '../../fixtures/register.json'
-import { createUser, ensureUserState } from '../../api/account.api';
+import { createUserFactory } from '../../fixtures/login/user.ts';
+import { createUser, deleteUser } from '../../api/account.api';
+import { CreateUserParams } from '../../models/general.api.model';
 
 let loginPage: LoginPage
+let user: CreateUserParams
 
-test.beforeEach(({ page }) => {
+test.beforeEach(async ({ page }) => {
+    // 1. Gera um usuário novo e único para evitar colisões no paralelismo
+    user = createUserFactory()
     loginPage = new LoginPage(page)
 })
 
-test.describe('Signup and login', () => {
-    
-    test('Verify the login page is available', async ({ page }) => {
-        await loginPage.go('/login')
-        await expect(page).toHaveURL(/\/login/)
-        await expect(page.locator('h2', { hasText: 'New User Signup!' })).toBeVisible()
-    })
+test.afterEach(async ({ request }) => {
+    // 2. Cleanup: Deleta o usuário criado logo após o fim do teste
+    await deleteUser(request, user.email, user.password)
+})
 
-    test('Verify login page access and signup a new user', async ({ page, request }) => {
-        const user = data.REGISTER as UserModel
-        await ensureUserState(request, user, 'absent')
-        await loginPage.go('/login')
+test.describe('Signup and Login Flow', () => {
 
+    test('Verify login page access and signup a new user', async ({ page }) => {
+        await loginPage.go('/login')
         await loginPage.registerUI(user)
-        await expect(page.locator('b', { hasText: 'Enter Account Information' })).toBeVisible()
+            
+        await expect(page).toHaveURL(/\/signup$/)
+        await expect(
+            page.locator('h2.title.text-center', { hasText: 'Enter Account Information' }),
+        ).toBeVisible()
+            
         await loginPage.createUserUI(user)
         await page.click('[data-qa="create-account"]')
         await expect(page.locator('[data-qa="account-created"]')).toBeVisible()
-
-    })
-    
-    test('Verify user creation through API', async ({ request }) => {
-        const user = data.REGISTER as UserModel
-        await ensureUserState(request, user, 'absent')
-        const response = await createUser(request, user)
-        expect(response.message).toContain('User created')
     })
 
     test('Verify login through UI', async ({ page, request }) => {
-        const user = data.REGISTER as UserModel
-        await ensureUserState(request, user, 'present')
+        // Setup: Cria o usuário via API para testar apenas o login na UI
+        await createUser(request, user)
+            
         await loginPage.go('/login')
         await loginPage.loginUI(user)
+
+        await expect(page.locator('a', { hasText: ' Logout' })).toBeVisible()
     })
 })

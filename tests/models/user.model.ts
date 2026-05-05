@@ -1,5 +1,4 @@
 export interface UserModel {
-    login_url: string
     name: string
     firstname: string
     lastname: string
